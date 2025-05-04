@@ -9,72 +9,73 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@/context/AuthContext";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 
-const Login: React.FC = () => {
+interface LoginProps {
+  navigation: NavigationProp<RootStackParamList>;
+}
+
+const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [telefono, setTelefono] = useState("");
   const [contraseña, setContraseña] = useState("");
-  const [localError, setLocalError] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    user,
-    login,
-    loading: authLoading,
-    error: authError,
-    clearError,
-  } = useAuth();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { user, login, loading: authLoading } = useAuth();
 
+  // Redirección basada en el tipo de usuario
   useEffect(() => {
     if (user) {
       if (user.tipo_usuario === "admin") {
-        navigation.navigate("PerfilAdmin");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "PerfilAdmin" }],
+        });
       } else {
-        navigation.navigate("MainApp");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Perfil" }],
+        });
       }
     }
   }, [user, navigation]);
 
-  useEffect(() => {
-    // Limpiar errores al desmontar el componente
-    return () => {
-      clearError();
-    };
-  }, []);
-
   const formatPhoneNumber = (phone: string) => {
-    if (!phone) return "";
     return phone.replace(/\D/g, "");
   };
 
   const handleLogin = async () => {
     try {
       setIsSubmitting(true);
-      setLocalError("");
-      clearError();
+      setError("");
 
+      // Validaciones básicas
       if (!telefono.trim() || !contraseña.trim()) {
-        setLocalError("Por favor, completa todos los campos");
+        setError("Por favor, completa todos los campos");
         return;
       }
 
       const formattedTelefono = formatPhoneNumber(telefono);
       if (formattedTelefono.length !== 10) {
-        setLocalError("El teléfono debe tener 10 dígitos");
+        setError("El teléfono debe tener 10 dígitos");
         return;
       }
 
-      const { error } = await login(formattedTelefono, contraseña);
-      if (error) {
-        setLocalError(error);
-      }
-    } catch (error) {
-      setLocalError("Ocurrió un error al iniciar sesión");
+      await login(formattedTelefono, contraseña);
+    } catch (error: any) {
+      setError(error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007BFF" />
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -88,22 +89,12 @@ const Login: React.FC = () => {
 
           <View style={styles.registerContainer}>
             <Text style={styles.subtitle}>¿No tienes cuenta?</Text>
-            <TouchableOpacity
-              onPress={() => {
-                clearError();
-                navigation.navigate("Registro");
-              }}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity onPress={() => navigation.navigate("Registro")}>
               <Text style={styles.registerText}>Regístrate</Text>
             </TouchableOpacity>
           </View>
 
-          {(localError || authError) && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{localError || authError}</Text>
-            </View>
-          )}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
           <Text style={styles.label}>Teléfono:</Text>
           <TextInput
@@ -112,13 +103,11 @@ const Login: React.FC = () => {
             value={telefono}
             onChangeText={(text) => {
               setTelefono(text);
-              setLocalError("");
-              clearError();
+              setError("");
             }}
             placeholder="10 dígitos"
             placeholderTextColor="#999"
             maxLength={10}
-            editable={!isSubmitting}
           />
 
           <Text style={styles.label}>Contraseña:</Text>
@@ -128,19 +117,16 @@ const Login: React.FC = () => {
             value={contraseña}
             onChangeText={(text) => {
               setContraseña(text);
-              setLocalError("");
-              clearError();
+              setError("");
             }}
             placeholder="Tu contraseña"
             placeholderTextColor="#999"
-            editable={!isSubmitting}
           />
 
           <TouchableOpacity
-            style={[styles.button, isSubmitting && styles.disabledButton]}
+            style={styles.button}
             onPress={handleLogin}
             disabled={isSubmitting}
-            activeOpacity={0.7}
           >
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
@@ -210,21 +196,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
   },
-  disabledButton: {
-    backgroundColor: "#cccccc",
-  },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  errorContainer: {
-    backgroundColor: "#FFEBEE",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: "#FF5252",
-  },
   errorText: {
-    color: "#D32F2F",
+    color: "#FF6B6B",
     textAlign: "center",
+    marginBottom: 16,
+    fontSize: 14,
   },
 });
 

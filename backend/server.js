@@ -284,23 +284,170 @@ app.get("/verify-token", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
-
-// Otras rutas
-app.get("/mejores-platillos", async (req, res) => {
+// Obtener todas las categorías
+app.get('/categorias', async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT id, nombre, descripcion, precio, 
-             COALESCE(calificacion_promedio, 0) AS calificacion_promedio, imagen
-      FROM platillos
-      ORDER BY calificacion_promedio DESC
-      LIMIT 5
-    `);
-    res.json(rows);
+    const [categorias] = await db.query('SELECT * FROM categoria');
+    res.json(categorias);
   } catch (error) {
-    console.error("Error al obtener platillos:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error('Error al obtener categorías:', error);
+    res.status(500).json({ error: 'Error al obtener categorías' });
   }
 });
+app.get('/categorias/:id', async (req, res) => {
+  try {
+    const [categoria] = await pool.query('SELECT * FROM categoria WHERE id = ?', [req.params.id]);
+    
+    if (categoria.length === 0) {
+      return res.status(404).json({ error: 'Categoría no encontrada' });
+    }
+    
+    res.json(categoria[0]);
+  } catch (error) {
+    console.error('Error al obtener categoría:', error);
+    res.status(500).json({ error: 'Error al obtener categoría' });
+  }
+});
+
+// Endpoints para platillos
+app.get('/platillos/categoria/:categoriaId', async (req, res) => {
+  try {
+    const [platillos] = await pool.query(
+      'SELECT p.* FROM platillo p WHERE p.categoria_id = ?',
+      [req.params.categoriaId]
+    );
+    
+    res.json(platillos);
+  } catch (error) {
+    console.error('Error al obtener platillos por categoría:', error);
+    res.status(500).json({ error: 'Error al obtener platillos' });
+  }
+});
+
+app.get('/platillos/:id', async (req, res) => {
+  try {
+    const [platillo] = await pool.query('SELECT * FROM platillo WHERE id = ?', [req.params.id]);
+    
+    if (platillo.length === 0) {
+      return res.status(404).json({ error: 'Platillo no encontrado' });
+    }
+    
+    res.json(platillo[0]);
+  } catch (error) {
+    console.error('Error al obtener platillo:', error);
+    res.status(500).json({ error: 'Error al obtener platillo' });
+  }
+});
+
+app.post('/platillos', async (req, res) => {
+  try {
+    const { nombre, descripcion, precio, categoria_id } = req.body;
+    
+    if (!nombre || !precio || !categoria_id) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
+    }
+    
+    const [result] = await pool.query(
+      'INSERT INTO platillo (nombre, descripcion, precio, categoria_id) VALUES (?, ?, ?, ?)',
+      [nombre, descripcion, precio, categoria_id]
+    );
+    
+    res.status(201).json({ 
+      id: result.insertId,
+      message: 'Platillo creado exitosamente' 
+    });
+  } catch (error) {
+    console.error('Error al crear platillo:', error);
+    res.status(500).json({ error: 'Error al crear platillo' });
+  }
+});
+// Obtener una categoría específica por ID
+app.get('/categorias/:id', async (req, res) => {
+  try {
+    const [categoria] = await db.query('SELECT * FROM categoria WHERE id = ?', [req.params.id]);
+    
+    if (categoria.length === 0) {
+      return res.status(404).json({ error: 'Categoría no encontrada' });
+    }
+    
+    res.json(categoria[0]);
+  } catch (error) {
+    console.error('Error al obtener categoría:', error);
+    res.status(500).json({ error: 'Error al obtener categoría' });
+  }
+});
+// Obtener todos los platillos con información de categoría
+app.get('/platillos', async (req, res) => {
+  try {
+    const [platillos] = await db.query(`
+      SELECT p.*, c.nombre AS categoria_nombre 
+      FROM platillo p
+      JOIN categoria c ON p.categoria_id = c.id
+    `);
+    res.json(platillos);
+  } catch (error) {
+    console.error('Error al obtener platillos:', error);
+    res.status(500).json({ error: 'Error al obtener platillos' });
+  }
+});
+
+// Obtener platillos por categoría
+app.get('/categorias/:id/platillos', async (req, res) => {
+  try {
+    const [platillos] = await db.query(`
+      SELECT p.*, c.nombre AS categoria_nombre 
+      FROM platillo p
+      JOIN categoria c ON p.categoria_id = c.id
+      WHERE p.categoria_id = ?
+    `, [req.params.id]);
+    
+    // Formatear la respuesta
+    const platillosFormateados = platillos.map(platillo => ({
+      id: platillo.id,
+      nombre: platillo.nombre,
+      descripcion: platillo.descripcion,
+      precio: platillo.precio,
+      imagen: platillo.imagen ? `${process.env.BASE_URL}/images/${platillo.imagen}` : null,
+      categoria: {
+        id: platillo.categoria_id,
+        nombre: platillo.categoria_nombre
+      }
+    }));
+    
+    res.json(platillosFormateados);
+  } catch (error) {
+    console.error('Error al obtener platillos por categoría:', error);
+    res.status(500).json({ 
+      error: 'Error al obtener platillos por categoría',
+      detalle: error.message 
+    });
+  }
+});
+
+
+// Endpoint para obtener platillos por categoría
+app.get('/platillos', async (req, res) => {
+  const { categoria_id } = req.query;
+  
+  try {
+    let query = 'SELECT * FROM platillo';
+    const params = [];
+    
+    if (categoria_id) {
+      query += ' WHERE categoria_id = ?';
+      params.push(categoria_id);
+    }
+    
+    const [results] = await connection.execute(query, params);
+    res.json(results);
+  } catch (error) {
+    console.error('Error al obtener platillos:', error);
+    res.status(500).json({ error: 'Error al obtener platillos' });
+  }
+});
+
+// Servir imágenes estáticas
+app.use('/images', express.static('assets/images'));
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
@@ -315,6 +462,27 @@ app.listen(PORT, '0.0.0.0', () => {
       }
     });
   });
+
+// Endpoint para obtener platillos por categoría
+app.get('/platillos', async (req, res) => {
+  const { categoria_id } = req.query;
+  
+  try {
+    let query = 'SELECT * FROM platillo';
+    const params = [];
+    
+    if (categoria_id) {
+      query += ' WHERE categoria_id = ?';
+      params.push(categoria_id);
+    }
+    
+    const [results] = await connection.execute(query, params);
+    res.json(results);
+  } catch (error) {
+    console.error('Error al obtener platillos:', error);
+    res.status(500).json({ error: 'Error al obtener platillos' });
+  }
+});
 
   console.log(`
   🚀 Servidor funcionando en:

@@ -11,9 +11,20 @@ export type RootStackParamList = {
   Inicio: undefined;
   AdminStack: undefined;
   MainApp: undefined;
+  PlatillosCategoria: {
+    categoriaId: number;
+    categoriaNombre: string;
+  };
 };
 
-
+export interface Platillo {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  imagen: string;
+  categoria_id?: number;
+}
 export type InicioScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Inicio"
