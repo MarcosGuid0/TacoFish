@@ -41,7 +41,7 @@ export default function Carrusel() {
 
   const fetchPlatillos = async () => {
     const response = await axios.get(
-      "http://10.19.100.158:3000/mejores-platillos"
+      "http://192.168.1.161:3000/mejores-platillos"
     );
     setPlatillos(response.data);
   };

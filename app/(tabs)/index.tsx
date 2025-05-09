@@ -1,10 +1,11 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import { NavigationContainer, NavigationProp, useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { RootStackParamList } from "@/types/types";
+import { CarritoProvider, useCarrito } from "@/context/CarritoContext";
 
 // Pantallas
 import Inicio from "@/screens/Inicio";
@@ -43,7 +44,6 @@ const ProfileRedirect = () => {
 
   React.useEffect(() => {
     if (user && user.tipo_usuario !== "admin") {
-      // Redirigir a Inicio si el usuario es cliente
       navigation.navigate("Inicio");
     }
   }, [user, navigation]);
@@ -61,6 +61,8 @@ const ProfileRedirect = () => {
 };
 
 const HomeTabs = () => {
+  const { carrito } = useCarrito(); // 🔥 aquí se accede al contexto del carrito
+
   return (
     <Tab.Navigator
       initialRouteName="Inicio"
@@ -95,7 +97,14 @@ const HomeTabs = () => {
     >
       <Tab.Screen name="Inicio" component={Inicio} />
       <Tab.Screen name="Menú" component={Menu} />
-      <Tab.Screen name="Carrito" component={Carrito} />
+      <Tab.Screen
+        name="Carrito"
+        component={Carrito}
+        options={{
+          // 🔔 Aquí se muestra el número del carrito como badge
+          tabBarBadge: carrito.length > 0 ? carrito.length : undefined,
+        }}
+      />
       <Tab.Screen name="Perfil" component={ProfileRedirect} />
     </Tab.Navigator>
   );
@@ -104,7 +113,9 @@ const HomeTabs = () => {
 const App = () => {
   return (
     <AuthProvider>
-        <HomeTabs />
+      <CarritoProvider>
+        <HomeTabs /> {/* El NavigationContainer debe estar fuera de este archivo */}
+      </CarritoProvider>
     </AuthProvider>
   );
 };

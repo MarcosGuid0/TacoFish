@@ -11,6 +11,7 @@ import {
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useCarrito } from "../context/CarritoContext";
 
 interface Categoria {
   id: number;
@@ -56,6 +57,7 @@ const CATEGORIAS_IMAGENES: CategoriaImagenes = {
   9: require("../assets/images/platillos/tosticamaron.jpg"),
   10: require("../assets/images/platillos/hamburguesa_doble.jpg"),
   11: require("../assets/images/platillos/soda.jpg"),
+  12: require("../assets/images/platillos/limonadam_vaso.jpg"),
 };
 
 const PLATILLOS_IMAGENES: PlatilloImagenes = {
@@ -157,9 +159,6 @@ const PLATILLOS_IMAGENES: PlatilloImagenes = {
   "limonadam_litro.jpg": require("../assets/images/platillos/limonadam_litro.jpg"),
   "limonadam_jarra.jpg": require("../assets/images/platillos/limonadam_jarra.jpg"),
 
-  // Bebidas embotelladas (categoría_id 13)
-  "soda.jpg": require("../assets/images/platillos/soda.jpg"),
-
   // Imagen por defecto
   "default.jpg": require("../assets/images/platillos/default.jpg"),
 };
@@ -172,10 +171,11 @@ const Menu = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingPlatillos, setLoadingPlatillos] = useState(false);
+  const { agregarAlCarrito } = useCarrito();
 
   const fetchCategorias = async () => {
     try {
-      const response = await fetch("http://192.168.1.127:3000/categorias");
+      const response = await fetch("http://192.168.1.161:3000/categorias");
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
@@ -196,7 +196,7 @@ const Menu = () => {
     setError(null);
     try {
       const response = await fetch(
-        `http://192.168.1.127:3000/categorias/${categoriaId}/platillos`
+        `http://192.168.1.161:3000/categorias/${categoriaId}/platillos`
       );
 
       if (!response.ok) {
@@ -253,6 +253,11 @@ const Menu = () => {
 
     return imagen;
   };
+  
+  const handleAgregarAlCarrito = (platillo: Platillo) => {
+    const imagen = getImagenPlatillo(platillo.imagen);
+    agregarAlCarrito({ ...platillo, imagen });
+  };
 
   const handlePressCategoria = (categoria: Categoria) => {
     setCategoriaSeleccionada(categoria);
@@ -297,9 +302,25 @@ const Menu = () => {
         <Text style={styles.platilloPrecio}>
           ${Number(item.precio).toFixed(2)}
         </Text>
+  
+        <TouchableOpacity
+          onPress={() => handleAgregarAlCarrito(item)}
+          style={{
+            backgroundColor: "#ff6347",
+            padding: 8,
+            marginTop: 8,
+            borderRadius: 8,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>
+            Agregar al carrito
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
+  
 
   if (loading) {
     return (
