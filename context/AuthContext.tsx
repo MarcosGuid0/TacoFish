@@ -7,6 +7,7 @@ type User = {
   nombre: string;
   telefono: string;
   tipo_usuario: string;
+  token: string; // Asegúrate de que esto esté definido
 };
 
 type AuthContextType = {
@@ -19,7 +20,7 @@ type AuthContextType = {
   loading: boolean;
   error: string | null;
   clearError: () => void;
-  
+  // Add this line
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -42,8 +43,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({
 
   useEffect(() => {
     const loadUser = async () => {
+      
       try {
         const token = await AsyncStorage.getItem("token");
+        console.log("Token:", token);
+
         if (token) {
           const response = await axios.get(
             "http://192.168.8.101:3000/verify-token",
@@ -51,7 +55,12 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          setUser(response.data.user);
+          if (response.data.user) {
+  setUser({ ...response.data.user, token });
+} else {
+  setUser(null);
+}
+
         }
       } catch (error) {
         await AsyncStorage.removeItem("token");
@@ -81,8 +90,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({
       }
 
       await AsyncStorage.setItem("token", token);
-      setUser(usuario);
-      return { user: usuario };
+      // Asegúrate de incluir el token en el objeto usuario
+      setUser({ ...usuario, token });
+      return { user: { ...usuario, token } };
     } catch (error: any) {
       let errorMessage = "Ocurrió un error al iniciar sesión"; // Mensaje por defecto
 
@@ -95,7 +105,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({
             break;
           case 401:
             // Para credenciales incorrectas
-            errorMessage = "Contraseña incorrecta";
+            errorMessage =
+              error.response.data?.error || "Contraseña incorrecta";
             break;
           case 404:
             // Para usuario no encontrado
