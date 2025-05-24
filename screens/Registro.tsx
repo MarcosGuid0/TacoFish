@@ -37,7 +37,7 @@ interface RegistroProps {
   navigation: NavigationProp<RootStackParamList>;
 }
 
-const API_BASE_URL = "http://10.19.100.158:3000";
+const API_BASE_URL = "http://10.19.60.241:3000";
 
 const Registro: React.FC<RegistroProps> = ({
   setIsLoggedIn,
@@ -443,11 +443,12 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   button: {
-    backgroundColor: "#00C9A7",
+    backgroundColor: "#0084FF",
     padding: 14,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 20,
+    
   },
   buttonText: {
     color: "#fff",

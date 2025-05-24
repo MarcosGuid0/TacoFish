@@ -24,7 +24,7 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { jwtDecode } from "jwt-decode";
 
 // Configuración base
-const API_BASE_URL = "http://192.168.8.101:3000";
+const API_BASE_URL = "http://10.19.60.241:3000";
 
 // Interfaces
 interface Categoria {
@@ -898,7 +898,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     fontSize: 18,
     color: "#0077b6",
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   errorContainer: {
     flex: 1,
@@ -916,7 +916,7 @@ const styles = StyleSheet.create({
     color: "#ef476f",
     textAlign: "center",
     marginBottom: 25,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   retryButton: {
     backgroundColor: "#00b4d8",
@@ -924,14 +924,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#0077b6',
+    borderColor: "#0077b6",
     elevation: 3,
   },
   retryButtonText: {
     color: "white",
     fontWeight: "bold",
     fontSize: 18,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   botonDisabled: {
     backgroundColor: "#90e0ef",
@@ -943,8 +943,8 @@ const styles = StyleSheet.create({
     marginVertical: 25,
     textAlign: "center",
     color: "#0077b6",
-    textShadowColor: 'rgba(0, 119, 182, 0.2)',
-    textShadowOffset: {width: 1, height: 1},
+    textShadowColor: "rgba(0, 119, 182, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
   gridContainer: {
@@ -966,7 +966,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     borderWidth: 1,
-    borderColor: '#caf0f8',
+    borderColor: "#caf0f8",
   },
   imageBackground: {
     flex: 1,
@@ -981,8 +981,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: "25%",
-    backgroundColor: "rgba(109, 224, 247, 0.7)",
+    height: "15%",
+    backgroundColor: "rgba(9, 135, 160, 0.7)",
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
   },
@@ -1002,10 +1002,10 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 10,
     alignSelf: "flex-start",
-    backgroundColor: 'rgba(0, 180, 216, 0.2)',
+    backgroundColor: "rgba(0, 180, 216, 0.2)",
     borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   backButtonText: {
     color: "#0077b6",
@@ -1025,7 +1025,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     margin: 20,
     borderWidth: 1,
-    borderColor: '#90e0ef',
+    borderColor: "#90e0ef",
   },
   emptyText: {
     fontSize: 18,
@@ -1052,7 +1052,7 @@ const styles = StyleSheet.create({
     height: 200,
     resizeMode: "cover",
     borderBottomWidth: 1,
-    borderColor: '#caf0f8',
+    borderColor: "#caf0f8",
   },
   platilloInfo: {
     padding: 20,
@@ -1085,7 +1085,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#caf0f8',
+    borderColor: "#caf0f8",
   },
   ratingDisplay: {
     flexDirection: "row",
@@ -1099,15 +1099,16 @@ const styles = StyleSheet.create({
   },
   verCalificacionesBtn: {
     backgroundColor: "#00b4d8",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 7,
+    borderRadius: 5,
     elevation: 2,
+    marginLeft: 10,
   },
   verCalificacionesText: {
     color: "white",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "300",
   },
   botonAgregar: {
     backgroundColor: "#0096c7",
@@ -1117,7 +1118,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#0077b6',
+    borderColor: "#0077b6",
   },
   botonAgregarTexto: {
     color: "white",
@@ -1138,7 +1139,7 @@ const styles = StyleSheet.create({
   modalCloseButton: {
     alignSelf: "flex-end",
     padding: 10,
-    backgroundColor: 'rgba(0, 180, 216, 0.2)',
+    backgroundColor: "rgba(0, 180, 216, 0.2)",
     borderRadius: 20,
     marginBottom: 15,
   },
@@ -1160,8 +1161,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#0077b6",
     textAlign: "center",
-    textDecorationLine: 'underline',
-    textDecorationColor: '#00b4d8',
+    textDecorationLine: "underline",
+    textDecorationColor: "#00b4d8",
   },
   ratingSummary: {
     alignItems: "center",
@@ -1171,7 +1172,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#90e0ef',
+    borderColor: "#90e0ef",
   },
   ratingPromedio: {
     fontSize: 42,
@@ -1183,7 +1184,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#48cae4",
     marginTop: 5,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   subtitulo: {
     fontSize: 22,
@@ -1191,9 +1192,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: "#0077b6",
     borderBottomWidth: 2,
-    borderColor: '#00b4d8',
+    borderColor: "#00b4d8",
     paddingBottom: 5,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   nuevaCalificacionContainer: {
     marginBottom: 25,
@@ -1202,7 +1203,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#90e0ef',
+    borderColor: "#90e0ef",
   },
   comentarioInput: {
     borderWidth: 1.5,
@@ -1214,7 +1215,7 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
     backgroundColor: "white",
     fontSize: 16,
-    color: '#0077b6',
+    color: "#0077b6",
   },
   botonEnviar: {
     backgroundColor: "#00b4d8",
@@ -1223,22 +1224,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#0077b6',
+    borderColor: "#0077b6",
   },
   botonEnviarTexto: {
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   comentariosTitulo: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
     color: "#0077b6",
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-    textDecorationColor: '#00b4d8',
+    textAlign: "center",
+    textDecorationLine: "underline",
+    textDecorationColor: "#00b4d8",
   },
   comentarioContainer: {
     backgroundColor: "white",
@@ -1251,7 +1252,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: '#caf0f8',
+    borderColor: "#caf0f8",
   },
   comentarioHeader: {
     flexDirection: "row",
@@ -1274,7 +1275,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#48cae4",
     marginTop: 5,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   deleteButton: {
     backgroundColor: "#ef476f",
@@ -1282,55 +1283,55 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#d90429',
+    borderColor: "#d90429",
   },
   sinComentarios: {
     fontSize: 18,
     color: "#48cae4",
     textAlign: "center",
     marginTop: 25,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   // Nuevos estilos añadidos
   waveDecoration: {
     height: 20,
-    width: '100%',
+    width: "100%",
     marginBottom: 15,
   },
   badgePopular: {
-    position: 'absolute',
+    position: "absolute",
     top: 15,
     right: 15,
-    backgroundColor: '#ef476f',
+    backgroundColor: "#ef476f",
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 10,
     zIndex: 1,
   },
   badgePopularText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   priceContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   discountBadge: {
-    backgroundColor: '#ef476f',
+    backgroundColor: "#ef476f",
     padding: 5,
     borderRadius: 6,
   },
   discountText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 14,
   },
   originalPrice: {
     fontSize: 16,
-    color: '#ef476f',
-    textDecorationLine: 'line-through',
+    color: "#ef476f",
+    textDecorationLine: "line-through",
     marginRight: 5,
   },
 });

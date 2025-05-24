@@ -43,24 +43,22 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({
 
   useEffect(() => {
     const loadUser = async () => {
-      
       try {
         const token = await AsyncStorage.getItem("token");
         console.log("Token:", token);
 
         if (token) {
           const response = await axios.get(
-            "http://192.168.8.101:3000/verify-token",
+            "http://10.19.60.241:3000/verify-token",
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
           if (response.data.user) {
-  setUser({ ...response.data.user, token });
-} else {
-  setUser(null);
-}
-
+            setUser({ ...response.data.user, token });
+          } else {
+            setUser(null);
+          }
         }
       } catch (error) {
         await AsyncStorage.removeItem("token");
@@ -78,7 +76,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({
       setLoading(true);
       setError(null);
 
-      const response = await axios.post("http://192.168.8.101:3000/login", {
+      const response = await axios.post("http://10.19.60.241:3000/login", {
         telefono,
         contraseña,
       });
