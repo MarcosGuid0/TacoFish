@@ -9,9 +9,18 @@ interface Platillo {
   cantidad?: number;
 }
 
+interface PlatilloEnCarrito {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  imagen: { uri: string }; // ← ya formateada
+  cantidad?: number;
+}
+
 interface CarritoContextType {
-  carrito: Platillo[];
-  agregarAlCarrito: (platillo: Platillo) => void;
+  carrito: PlatilloEnCarrito[];
+  agregarAlCarrito: (platillo: PlatilloEnCarrito) => void;
   quitarDelCarrito: (id: number) => void;
   limpiarCarrito: () => void;
 }
@@ -19,9 +28,9 @@ interface CarritoContextType {
 const CarritoContext = createContext<CarritoContextType | undefined>(undefined);
 
 export const CarritoProvider = ({ children }: { children: ReactNode }) => {
-  const [carrito, setCarrito] = useState<Platillo[]>([]);
+  const [carrito, setCarrito] = useState<PlatilloEnCarrito[]>([]);
 
-  const agregarAlCarrito = (platillo: Platillo) => {
+  const agregarAlCarrito = (platillo: PlatilloEnCarrito) => {
     setCarrito((prev) => {
       const existente = prev.find((item) => item.id === platillo.id);
       if (existente) {
@@ -36,7 +45,7 @@ export const CarritoProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const quitarDelCarrito = (id: number) => {
+   const quitarDelCarrito = (id: number) => {
     setCarrito((prev) => prev.filter((item) => item.id !== id));
   };
 

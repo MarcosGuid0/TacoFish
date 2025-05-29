@@ -301,33 +301,32 @@ app.get("/verify-token", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
-// Obtener todas las categorías
-app.get('/categorias', async (req, res) => {
+app.get("/categorias", async (req, res) => {
   try {
-    const [categorias] = await db.query('SELECT * FROM categoria');
-    res.json(categorias);
+    const [rows] = await db.query(`
+      SELECT id, nombre, imagen
+      FROM categoria
+    `);
+
+    const categoriasConImagen = rows.map((categoria) => {
+      let imagenBase64 = null;
+      if (categoria.imagen && categoria.imagen instanceof Buffer) {
+        imagenBase64 = categoria.imagen.toString('base64');
+      }
+
+      return {
+        ...categoria,
+        imagen: imagenBase64, // Imagen convertida a base64
+      };
+    });
+
+    res.json(categoriasConImagen);
   } catch (error) {
-    console.error('Error al obtener categorías:', error);
-    res.status(500).json({ error: 'Error al obtener categorías' });
-  }
-});
-app.get('/categorias/:id', async (req, res) => {
-  try {
-    const [categoria] = await pool.query('SELECT * FROM categoria WHERE id = ?', [req.params.id]);
-    
-    if (categoria.length === 0) {
-      return res.status(404).json({ error: 'Categoría no encontrada' });
-    }
-    
-    res.json(categoria[0]);
-  } catch (error) {
-    console.error('Error al obtener categoría:', error);
-    res.status(500).json({ error: 'Error al obtener categoría' });
+    console.error("Error al obtener categorías:", error);
+    res.status(500).json({ error: "Error al obtener categorías" });
   }
 });
 
-
-// Obtener platillos por categoría
 app.get('/categorias/:id/platillos', async (req, res) => {
   try {
     const [platillos] = await db.query(`
@@ -336,20 +335,27 @@ app.get('/categorias/:id/platillos', async (req, res) => {
       JOIN categoria c ON p.categoria_id = c.id
       WHERE p.categoria_id = ?
     `, [req.params.id]);
-    
-    // Formatear la respuesta
-    const platillosFormateados = platillos.map(platillo => ({
-      id: platillo.id,
-      nombre: platillo.nombre,
-      descripcion: platillo.descripcion,
-      precio: platillo.precio,
-      imagen: platillo.imagen ? `${process.env.BASE_URL}/images/${platillo.imagen}` : null,
-      categoria: {
-        id: platillo.categoria_id,
-        nombre: platillo.categoria_nombre
+
+    const platillosFormateados = platillos.map(platillo => {
+      // Convertir el BLOB a base64
+      let imagenBase64 = null;
+      if (platillo.imagen && platillo.imagen instanceof Buffer) {
+        imagenBase64 = platillo.imagen.toString('base64');
       }
-    }));
-    
+
+      return {
+        id: platillo.id,
+        nombre: platillo.nombre,
+        descripcion: platillo.descripcion,
+        precio: platillo.precio,
+        imagen: imagenBase64, // Enviar como base64
+        categoria: {
+          id: platillo.categoria_id,
+          nombre: platillo.categoria_nombre
+        }
+      };
+    });
+
     res.json(platillosFormateados);
   } catch (error) {
     console.error('Error al obtener platillos por categoría:', error);
@@ -360,6 +366,34 @@ app.get('/categorias/:id/platillos', async (req, res) => {
   }
 });
 
+app.get("/platillos", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT p.id, p.nombre, p.descripcion, p.precio, p.imagen, 
+             c.nombre AS categoria
+      FROM platillo p
+      JOIN categoria c ON p.categoria_id = c.id
+    `);
+
+    const platillosConImagen = rows.map((platillo) => {
+      // Convertir el BLOB a base64
+      let imagenBase64 = null;
+      if (platillo.imagen && platillo.imagen instanceof Buffer) {
+        imagenBase64 = platillo.imagen.toString('base64');
+      }
+
+      return {
+        ...platillo,
+        imagen: imagenBase64, // Enviar como base64
+      };
+    });
+
+    res.json(platillosConImagen);
+  } catch (error) {
+    console.error("Error al obtener platillos:", error);
+    res.status(500).json({ error: "Error al obtener platillos" });
+  }
+});
 //Carrusel 
 app.get('/api/platillos-destacados', async (req, res) => {
   let connection;
@@ -418,7 +452,9 @@ app.get('/api/platillos-destacados', async (req, res) => {
       return {
         id: platillo.id.toString(),
         nombre: platillo.nombre,
-        imagen: platillo.imagen || 'default.jpg',
+        imagen: platillo.imagen 
+        ? `data:image/jpeg;base64,${platillo.imagen.toString('base64')}` 
+        : null,
         descripcion: platillo.descripcion || '',
         categoria: platillo.categoria,
         calificacion: Number(platillo.calificacion_promedio),
@@ -447,7 +483,10 @@ app.get('/api/platillos-destacados', async (req, res) => {
       const resultado = platillosAleatorios.map(p => ({
         id: p.id.toString(),
         nombre: p.nombre,
-        imagen: p.imagen || 'default.jpg',
+        imagen: p.imagen 
+        ? `data:image/jpeg;base64,${p.imagen.toString('base64')}` 
+        : null,
+
         descripcion: p.descripcion || '',
         categoria: p.categoria,
         calificacion: 0,
@@ -830,25 +869,7 @@ app.listen(PORT, '0.0.0.0', () => {
   });
 
 // Endpoint para obtener platillos por categoría
-app.get('/platillos', async (req, res) => {
-  const { categoria_id } = req.query;
-  
-  try {
-    let query = 'SELECT * FROM platillo';
-    const params = [];
-    
-    if (categoria_id) {
-      query += ' WHERE categoria_id = ?';
-      params.push(categoria_id);
-    }
-    
-    const [results] = await connection.execute(query, params);
-    res.json(results);
-  } catch (error) {
-    console.error('Error al obtener platillos:', error);
-    res.status(500).json({ error: 'Error al obtener platillos' });
-  }
-});
+
 
   console.log(`
   🚀 Servidor funcionando en:

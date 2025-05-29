@@ -24,12 +24,13 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { jwtDecode } from "jwt-decode";
 
 // Configuración base
-const API_BASE_URL = "http://10.19.60.241:3000";
+const API_BASE_URL = "http://192.168.1.185:3000";
 
 // Interfaces
 interface Categoria {
   id: number;
   nombre: string;
+  imagen: string | null;
 }
 
 interface Platillo {
@@ -37,7 +38,7 @@ interface Platillo {
   nombre: string;
   descripcion: string;
   precio: number;
-  imagen: string | null;
+  imagen: string | null; // Ahora será base64 string
   categoria: {
     id: number;
     nombre: string;
@@ -45,6 +46,11 @@ interface Platillo {
   promedio_calificaciones?: string;
   total_calificaciones?: number;
 }
+
+type PlatilloEnCarrito = Omit<Platillo, "imagen"> & {
+  imagen: { uri: string };
+  cantidad?: number;
+};
 
 interface Calificacion {
   id: number;
@@ -67,134 +73,20 @@ interface CategoriaImagenes {
   [id: number]: any;
 }
 
-interface PlatilloImagenes {
-  [key: string]: any;
-}
+const [platillos, setPlatillos] = useState([]);
+
+useEffect(() => {
+  fetch("http://192.168.1.185/platillos")
+    .then(res => res.json())
+    .then(data => setPlatillos(data))
+    .catch(err => console.error(err));
+}, []);
 // Configuración de dimensiones
 const { width } = Dimensions.get("window");
 const NUM_COLUMNS = 2;
 const ITEM_MARGIN = 16;
 const ITEM_WIDTH = (width - ITEM_MARGIN * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 const ITEM_HEIGHT = ITEM_WIDTH * 1.2;
-
-// Imágenes de categorías
-const CATEGORIAS_IMAGENES: CategoriaImagenes = {
-  1: require("../assets/images/platillos/taco_fish.jpg"),
-  2: require("../assets/images/platillos/caldo_7_mares.jpg"),
-  3: require("../assets/images/platillos/camaron_empanizado.jpg"),
-  4: require("../assets/images/platillos/coctel_camaron_mediano.jpg"),
-  5: require("../assets/images/platillos/el_aguachile.jpg"),
-  6: require("../assets/images/platillos/tostada_pulpo.jpg"),
-  7: require("../assets/images/platillos/ceviche_camaron_medio.jpg"),
-  8: require("../assets/images/platillos/callitos.jpg"),
-  9: require("../assets/images/platillos/tosticamaron.jpg"),
-  10: require("../assets/images/platillos/hamburguesa_doble.jpg"),
-  11: require("../assets/images/platillos/soda.jpg"),
-  12: require("../assets/images/platillos/limonadam_vaso.jpg"),
-};
-
-// Imágenes de platillos
-const PLATILLOS_IMAGENES: PlatilloImagenes = {
-  // Tacos (categoría_id 1)
-  "taco_fish.jpg": require("../assets/images/platillos/taco_fish.jpg"),
-  "taco_mixto.jpg": require("../assets/images/platillos/taco_mixto.jpg"),
-  "taco_master.jpg": require("../assets/images/platillos/taco_master.jpg"),
-  "taco_camacino.jpg": require("../assets/images/platillos/taco_camacino.jpg"),
-
-  // Mariscos (categoría_id 2)
-  "queca.jpg": require("../assets/images/platillos/queca.jpg"),
-  "quesadilla_marlin.jpg": require("../assets/images/platillos/quesadilla_marlin.jpg"),
-  "quesadilla_pulpo.jpg": require("../assets/images/platillos/quesadilla_pulpo.jpg"),
-  "burrito_marlin.jpg": require("../assets/images/platillos/burrito_marlin.jpg"),
-  "caldo_7_mares.jpg": require("../assets/images/platillos/caldo_7_mares.jpg"),
-  "caldo_camaron.jpg": require("../assets/images/platillos/caldo_camaron.jpg"),
-  "jugo_vichi.jpg": require("../assets/images/platillos/jugo_vichi.jpg"),
-  "el_30.jpg": require("../assets/images/platillos/el_30.jpg"),
-  "el_mixto.jpg": require("../assets/images/platillos/el_mixto.jpg"),
-  "el_rey.jpg": require("../assets/images/platillos/el_rey.jpg"),
-
-  // Empanizados y capeados (categoría_id 3)
-  "camaron_empanizado.jpg": require("../assets/images/platillos/camaron_empanizado.jpg"),
-  "camaron_williams.jpg": require("../assets/images/platillos/camaron_williams.jpg"),
-  "pescado_empanizado.jpg": require("../assets/images/platillos/pescado_empanizado.jpg"),
-
-  // Cocteles (categoría_id 4)
-  "coctel_camaron_chabela.jpg": require("../assets/images/platillos/coctel_camaron_chabela.jpg"),
-  "coctel_camaron_mediano.jpg": require("../assets/images/platillos/coctel_camaron_mediano.jpg"),
-  "coctel_aguachile_chabela.jpg": require("../assets/images/platillos/coctel_aguachile_chabela.jpg"),
-  "coctel_aguachile_mediano.jpg": require("../assets/images/platillos/coctel_aguachile_mediano.jpg"),
-  "campechana.jpg": require("../assets/images/platillos/campechana.jpg"),
-  "maleficio.jpg": require("../assets/images/platillos/maleficio.jpg"),
-  "el_brujo.jpg": require("../assets/images/platillos/el_brujo.jpg"),
-  "coctel_camaron_pulpo.jpg": require("../assets/images/platillos/coctel_camaron_pulpo.jpg"),
-
-  // Aguachiles (categoría_id 5)
-  "aguachile_negro_media.jpg": require("../assets/images/platillos/aguachile_negro_media.jpg"),
-  "aguachile_con_callo.jpg": require("../assets/images/platillos/aguachile_con_callo.jpg"),
-  "aguachile_levantamuertos.jpg": require("../assets/images/platillos/aguachile_levantamuertos.jpg"),
-  "aguachile.jpg": require("../assets/images/platillos/aguachile.jpg"),
-  "aguachile_media.jpg": require("../assets/images/platillos/aguachile_media.jpg"),
-  "aguachile_negro.jpg": require("../assets/images/platillos/aguachile_negro.jpg"),
-  "el_aguachile.jpg": require("../assets/images/platillos/el_aguachile.jpg"),
-
-  // Tostadas (categoría_id 6)
-  "tostada_callito.jpg": require("../assets/images/platillos/tostada_callito.jpg"),
-  "tostada_camaron.jpg": require("../assets/images/platillos/tostada_camaron.jpg"),
-  "tostada_aguachile.jpg": require("../assets/images/platillos/tostada_aguachile.jpg"),
-  "tostada_pulpo.jpg": require("../assets/images/platillos/tostada_pulpo.jpg"),
-  "tostada_suprema.jpg": require("../assets/images/platillos/tostada_suprema.jpg"),
-  "tostada_doble.jpg": require("../assets/images/platillos/tostada_doble.jpg"),
-  "tostada_triple.jpg": require("../assets/images/platillos/tostada_triple.jpg"),
-
-  // Ceviches (categoría_id 7)
-  "ceviche_camaron_medio.jpg": require("../assets/images/platillos/ceviche_camaron_medio.jpg"),
-  "ceviche_camaron_litro.jpg": require("../assets/images/platillos/ceviche_camaron_litro.jpg"),
-  "ceviche_tilapia_medio.jpg": require("../assets/images/platillos/ceviche_tilapia_medio.jpg"),
-  "ceviche_tilapia_litro.jpg": require("../assets/images/platillos/ceviche_tilapia_litro.jpg"),
-  "ceviche_mixto.jpg": require("../assets/images/platillos/ceviche_mixto.jpg"),
-
-  // Callitos (categoría_id 8)
-  "callitos.jpg": require("../assets/images/platillos/callitos.jpg"),
-  "callito_camaron.jpg": require("../assets/images/platillos/callito_camaron.jpg"),
-  "callito_camaron_pulpo.jpg": require("../assets/images/platillos/callito_camaron_pulpo.jpg"),
-
-  // Tosticamaron (categoría_id 9)
-  "tosticamaron.jpg": require("../assets/images/platillos/tosticamaron.jpg"),
-
-  // Hamburguesas (categoría_id 10)
-  "hamburguesa_clasica.jpg": require("../assets/images/platillos/hamburguesa_clasica.jpg"),
-  "hamburguesa_doble.jpg": require("../assets/images/platillos/hamburguesa_doble.jpg"),
-  "hamburguesa_bacona.jpg": require("../assets/images/platillos/hamburguesa_bacona.jpg"),
-  "hamburguesa_bacona_doble.jpg": require("../assets/images/platillos/hamburguesa_bacona_doble.jpg"),
-  "hamburguesa_mar_tierra.jpg": require("../assets/images/platillos/hamburguesa_mar_tierra.jpg"),
-  "hamburguesa_especial.jpg": require("../assets/images/platillos/hamburguesa_especial.jpg"),
-  "hamburguesa_camaron.jpg": require("../assets/images/platillos/hamburguesa_camaron.jpg"),
-  "hamburguesa_fish.jpg": require("../assets/images/platillos/hamburguesa_fish.jpg"),
-  "boneles.jpg": require("../assets/images/platillos/boneles.jpg"),
-  "nuggets_papas.jpg": require("../assets/images/platillos/nuggets_papas.jpg"),
-  "papas_fritas.jpg": require("../assets/images/platillos/papas_fritas.jpg"),
-  "papas_queso.jpg": require("../assets/images/platillos/papas_queso.jpg"),
-
-  // Bebidas (categoría_id 11)
-  "clamato_preparado.jpg": require("../assets/images/platillos/clamato_preparado.jpg"),
-  "uvola_vaso.jpg": require("../assets/images/platillos/uvola_vaso.jpg"),
-  "uvola_litro.jpg": require("../assets/images/platillos/uvola_litro.jpg"),
-  "uvola_jarra.jpg": require("../assets/images/platillos/uvola_jarra.jpg"),
-  "horchata.jpg": require("../assets/images/platillos/horchata.jpg"),
-  "jamaica.jpg": require("../assets/images/platillos/jamaica.jpg"),
-  "cebada.jpg": require("../assets/images/platillos/cebada.jpg"),
-  "cafe.jpg": require("../assets/images/platillos/cafe.jpg"),
-
-  // Limonadas (categoría_id 12)
-  "limonada_vaso.jpg": require("../assets/images/platillos/limonada_vaso.jpg"),
-  "limonada_litro.jpg": require("../assets/images/platillos/limonada_litro.jpg"),
-  "limonada_jarra.jpg": require("../assets/images/platillos/limonada_jarra.jpg"),
-  "limonadam_vaso.jpg": require("../assets/images/platillos/limonadam_vaso.jpg"),
-  "limonadam_litro.jpg": require("../assets/images/platillos/limonadam_litro.jpg"),
-  "limonadam_jarra.jpg": require("../assets/images/platillos/limonadam_jarra.jpg"),
-
-  "default.jpg": require("../assets/images/platillos/default.jpg"),
-};
 
 const Menu = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -518,22 +410,32 @@ const Menu = () => {
     }
   };
 
-  const getImagenCategoria = (id: number) => {
-    return CATEGORIAS_IMAGENES[id] || PLATILLOS_IMAGENES["default.jpg"];
+const getImagenCategoria = (imagenBase64: string | null) => {
+  if (!imagenBase64) {
+    return { uri: 'https://via.placeholder.com/150' };
+  }
+  
+  // Asegurarse de que el base64 tenga el prefijo correcto
+  const uri = imagenBase64.startsWith('data:image') 
+    ? imagenBase64 
+    : `data:image/jpeg;base64,${imagenBase64}`;
+  
+  return { uri };
+};
+
+
+
+const handleAgregarAlCarrito = (platillo: Platillo) => {
+  const platilloConImagenFormateada: PlatilloEnCarrito = {
+    ...platillo,
+    imagen: getImagenCategoria(platillo.imagen),
   };
 
-  const getImagenPlatillo = (imagenNombre: string | null) => {
-    if (!imagenNombre) return PLATILLOS_IMAGENES["default.jpg"];
-    const nombreArchivo = imagenNombre.split("/").pop() || imagenNombre;
-    return (
-      PLATILLOS_IMAGENES[nombreArchivo] || PLATILLOS_IMAGENES["default.jpg"]
-    );
-  };
+  agregarAlCarrito(platilloConImagenFormateada);
+};
 
-  const handleAgregarAlCarrito = (platillo: Platillo) => {
-    const imagen = getImagenPlatillo(platillo.imagen);
-    agregarAlCarrito({ ...platillo, imagen });
-  };
+
+
 
   const handlePressCategoria = (categoria: Categoria) => {
     setCategoriaSeleccionada(categoria);
@@ -545,34 +447,34 @@ const Menu = () => {
     setPlatillos([]);
   };
 
-  const renderCategoria = ({ item }: { item: Categoria }) => (
-    <TouchableOpacity
-      style={styles.categoriaContainer}
-      onPress={() => handlePressCategoria(item)}
-      activeOpacity={0.7}
+ const renderCategoria = ({ item }: { item: Categoria }) => (
+  <TouchableOpacity
+    style={styles.categoriaContainer}
+    onPress={() => handlePressCategoria(item)}
+    activeOpacity={0.7}
+  >
+    <ImageBackground
+      source={getImagenCategoria(item.imagen)}
+      style={styles.imageBackground}
+      imageStyle={styles.imageStyle}
     >
-      <ImageBackground
-        source={getImagenCategoria(item.id)}
-        style={styles.imageBackground}
-        imageStyle={styles.imageStyle}
-      >
-        <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.7)"]}
-          style={styles.gradient}
-        />
-        <Text style={styles.textoCategoria}>{item.nombre}</Text>
-      </ImageBackground>
-    </TouchableOpacity>
-  );
+      <LinearGradient
+        colors={["transparent", "rgba(0,0,0,0.7)"]}
+        style={styles.gradient}
+      />
+      <Text style={styles.textoCategoria}>{item.nombre}</Text>
+    </ImageBackground>
+  </TouchableOpacity>
+);
+
 
   const renderPlatillo = ({ item }: { item: Platillo }) => (
     <View style={styles.platilloContainer}>
       <TouchableOpacity onPress={() => handleAbrirCalificaciones(item)}>
-        <Image
-          source={getImagenPlatillo(item.imagen)}
-          style={styles.platilloImagen}
-          resizeMode="cover"
-        />
+       <Image
+  source={getImagenCategoria(item.imagen)}
+  style={styles.platilloImagen}
+/>
       </TouchableOpacity>
       <View style={styles.platilloInfo}>
         <Text style={styles.platilloNombre}>{item.nombre}</Text>
@@ -684,10 +586,10 @@ const Menu = () => {
         {platilloSeleccionado && (
           <View style={{ flex: 1 }}>
             <Image
-              source={getImagenPlatillo(platilloSeleccionado.imagen)}
-              style={styles.modalImagen}
-              resizeMode="cover"
-            />
+      source={{ uri: platilloSeleccionado.imagen || 'https://via.placeholder.com/150' }}
+      style={styles.modalImagen}
+      resizeMode="cover"
+    />
             <Text style={styles.modalTitulo}>
               {platilloSeleccionado.nombre}
             </Text>
